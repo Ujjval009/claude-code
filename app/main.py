@@ -18,10 +18,32 @@ def main():
 
     client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
 
+
     chat = client.chat.completions.create(
-        model="anthropic/claude-haiku-4.5",
-        messages=[{"role": "user", "content": args.p}],
-    )
+    model="anthropic/claude-haiku-4.5",
+    messages=[
+        {"role": "system", "content": "You are an assistant that is aware of available tools and can count them."},
+        {"role": "user", "content": args.p}
+    ],
+    tools=[
+        {
+            "type": "function",
+            "function": {
+                "name": "Read",
+                "description": "Read and return the contents of a file",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "file_path": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["file_path"]
+                }
+            }
+        }
+    ]
+)
 
     if not chat.choices or len(chat.choices) == 0:
         raise RuntimeError("no choices in response")
